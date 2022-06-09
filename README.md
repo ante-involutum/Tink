@@ -120,9 +120,3 @@ open http://127.0.0.1:3000
 ## REF
 
 [Metrics exposed](https://jmeter.apache.org/usermanual/realtime-results.html#metrics)
-
-## todo
-
-- api service
-- web ui
-- CLI
