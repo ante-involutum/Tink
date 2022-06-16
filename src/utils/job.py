@@ -6,8 +6,7 @@ Creates, updates, and deletes a job object.
 from kubernetes import client
 
 
-
-def create_job_object(job_name):
+def create_job_object(job_name, file_name='/jmx/pef-test.jmx'):
     secret_key_ref = client.V1SecretKeySelector(
         key='admin-user-token', name='influxdb')
     value_from = client.V1EnvVarSource(secret_key_ref=secret_key_ref)
@@ -17,9 +16,9 @@ def create_job_object(job_name):
 
     container = client.V1Container(
         name="jmeter",
-        image="mx2542/kakax-jmeter:latest",
+        image="mx2542/anti-base:1.0",
         command=["./apache-jmeter-5.4.3/bin/jmeter.sh"],
-        args=["-n", "-t", "pef-test.jmx"],
+        args=["-n", "-t", file_name],
         image_pull_policy='IfNotPresent',
         volume_mounts=[client.V1VolumeMount(mount_path='/jmx', name='jmx')],
         env=[client.V1EnvVar(name='INFLUXDB_TOKEN', value_from=value_from)])
