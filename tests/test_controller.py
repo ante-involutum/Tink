@@ -1,29 +1,29 @@
-from pprint import pprint
-
-from requests_toolbelt.sessions import BaseUrlSession
+import pytest
 
 
+@pytest.mark.usefixtures('init')
 class TestController():
 
-    bs = BaseUrlSession(base_url='http://127.0.0.1:8003')
-
-    def test_root(self):
-        resp = self.bs.get('/')
+    def test_create_job(self):
+        payload = {
+            "name": "jmx",
+            "jmx": "/jmx/pef-test.jmx"
+        }
+        resp = self.bs.post('/job', json=payload)
         assert resp.status_code == 200
 
-    def test_create_job(self):
-        resp = self.bs.post(f'/jobs/jmx')
-        pprint(resp.json())
+    def test_get_jobs(self):
+        resp = self.bs.get('/jobs')
         assert resp.status_code == 200
 
     def test_get_job(self):
-        resp = self.bs.get(f'/jobs/jmx')
+        resp = self.bs.get(f'/job/jmx')
         assert resp.status_code == 200
 
     def test_updata_job(self):
-        resp = self.bs.patch(f'/jobs/jmx')
+        resp = self.bs.patch(f'/job/jmx')
         assert resp.status_code == 200
 
     def test_delete_job(self):
-        resp = self.bs.delete(f'/jobs/jmx')
+        resp = self.bs.delete(f'/job/jmx')
         assert resp.status_code == 200
