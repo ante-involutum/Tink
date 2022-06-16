@@ -40,7 +40,7 @@ core_v1 = client.CoreV1Api()
 apps_v1 = client.AppsV1Api()
 
 
-@app.post("/job")
+@app.post("/tink/job")
 async def job_create(item: Item):
     job = create_job_object(item.name, item.jmx)
     resp = create_job(batch_v1, job)
@@ -48,26 +48,26 @@ async def job_create(item: Item):
     return resp.status.to_dict()
 
 
-@app.get("/job/{job_name}")
+@app.get("/tink/job/{job_name}")
 async def job_status(job_name):
     resp = get_job_status(batch_v1, job_name)
     return resp.status.to_dict()
 
 
-@app.patch("/job/{job_name}")
+@app.patch("/tink/job/{job_name}")
 async def job_update(job_name):
     job = create_job_object(job_name)
     resp = update_job(batch_v1, job, job_name)
     return resp.status.to_dict()
 
 
-@app.delete("/job/{job_name}")
+@app.delete("/tink/job/{job_name}")
 async def job_delete(job_name):
     resp = delete_job(batch_v1, job_name)
     jobs.remove(job_name)
     return resp.status
 
 
-@app.get("/jobs")
+@app.get("/tink/jobs")
 async def job_create():
     return jobs
