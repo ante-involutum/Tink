@@ -7,7 +7,7 @@ class TestController():
     def test_create_job(self):
         payload = {
             "name": "jmx",
-            "jmx": "/jmx/pef-test.jmx"
+            "jmx": "/jmx/example.jmx"
         }
         resp = self.bs.post('/tink/job', json=payload)
         assert resp.status_code == 200

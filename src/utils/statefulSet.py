@@ -5,7 +5,7 @@ from kubernetes import client, config
 stateful_set_name = "jmeter-master"
 
 
-def create_stateful_set_object(file_name="/jmx/pef-test.jmx"):
+def create_stateful_set_object(file_name="/jmx/example.jmx"):
 
     secret_key_ref = client.V1SecretKeySelector(
         key='admin-user-token', name='influxdb')
@@ -13,7 +13,7 @@ def create_stateful_set_object(file_name="/jmx/pef-test.jmx"):
 
     container = client.V1Container(
         name="jmeter-master",
-        image="mx2542/anti-base:1.0",
+        image="mx2542/anti-jmeter:1.0",
         command=["./apache-jmeter-5.4.3/bin/jmeter.sh"],
         args=["-n", "-t", file_name],
         ports=[client.V1ContainerPort(container_port=9270)],

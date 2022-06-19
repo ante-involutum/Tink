@@ -7,13 +7,13 @@ spec:
     spec:
       containers:
         - name: jmeter
-          image: mx2542/kakax-jmeter:latest
+          image: mx2542/anti-jmeter:1.0
           command:
             - "./apache-jmeter-5.4.3/bin/jmeter.sh"
           args:
             - "-n"
             - "-t"
-            - "pef-test.jmx"
+            - "example.jmx"
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /jmx
@@ -22,7 +22,7 @@ spec:
             - name: INFLUXDB_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: influxdb
+                  name: middleware-influxdb
                   key: admin-user-token
       restartPolicy: Never
       volumes:
