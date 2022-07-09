@@ -2,20 +2,16 @@ import os
 from fastapi import FastAPI
 from kubernetes import client, config
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
 
 from src.utils.job import *
+from src.model.job import Item
 from src.utils.service import *
+from src.utils.statefulSet import *
 
 jobs = []
 
 app = FastAPI()
-
-
-class Item(BaseModel):
-    name: str
-    jmx: str
 
 
 origins = [
@@ -70,4 +66,15 @@ async def job_delete(job_name):
 
 @app.get("/tink/jobs")
 async def job_create():
+    return jobs
+
+
+@app.get("/tink/plan")
+async def plan_create():
+    service = create_service_object()
+    stateful_set = create_stateful_set_object()
+
+    create_service(core_v1, service)
+    create_stateful_set(apps_v1, stateful_set)
+
     return jobs

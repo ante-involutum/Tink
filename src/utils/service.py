@@ -13,7 +13,7 @@ def create_service_object():
             name="metrics",
             port=9270,
         )],
-        cluster_ip=None)
+        type='ClusterIP')
 
     service = client.V1Service(
         api_version='v1',

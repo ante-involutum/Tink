@@ -2,7 +2,7 @@ import pytest
 
 
 @pytest.mark.usefixtures('init')
-class TestController():
+class TestTink():
 
     def test_create_job(self):
         payload = {
@@ -26,4 +26,8 @@ class TestController():
 
     def test_delete_job(self):
         resp = self.bs.delete(f'/tink/job/jmx')
+        assert resp.status_code == 200
+
+    def test_001(self):
+        resp = self.bs.get(f'/tink/plan')
         assert resp.status_code == 200

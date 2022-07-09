@@ -8,18 +8,20 @@ stateful_set_name = "jmeter-master"
 def create_stateful_set_object(file_name="/jmx/example.jmx"):
 
     secret_key_ref = client.V1SecretKeySelector(
-        key='admin-user-token', name='influxdb')
+        key='admin-user-token', name='middleware-influxdb')
     value_from = client.V1EnvVarSource(secret_key_ref=secret_key_ref)
 
     container = client.V1Container(
         name="jmeter-master",
         image="mx2542/anti-jmeter:1.0",
-        command=["./apache-jmeter-5.4.3/bin/jmeter.sh"],
-        args=["-n", "-t", file_name],
+        command=["sleep"],
+        args=["infinity"],
+        # command=["./apache-jmeter-5.4.3/bin/jmeter.sh"],
+        # args=["-n", "-t", file_name],
         ports=[client.V1ContainerPort(container_port=9270)],
         image_pull_policy='IfNotPresent',
         volume_mounts=[client.V1VolumeMount(mount_path='/jmx', name='jmx')],
-        env=[client.V1EnvVar(name='INFLUXDB_TOKEN', value_from=value_from)]
+        # env=[client.V1EnvVar(name='INFLUXDB_TOKEN', value_from=value_from)]
     )
 
     persistent_volume_claim = client.V1PersistentVolumeClaimVolumeSource(
@@ -72,11 +74,11 @@ def update_stateful_set(api, stateful_set):
     stateful_set.spec.template.spec.containers[0].args = ["infinity"]
     # stateful_set.spec.replicas = 3
 
-
     resp = api.patch_namespaced_stateful_set(
         name=stateful_set_name, namespace="default", body=stateful_set
     )
     return resp
+
 
 def restart_stateful_set(api, stateful_set):
 
@@ -90,7 +92,6 @@ def restart_stateful_set(api, stateful_set):
         name=stateful_set_name, namespace="default", body=stateful_set
     )
     return resp
-
 
 
 def delete_stateful_set(api):

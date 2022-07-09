@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: jmeter
+spec:
+  containers:
+    - name: jmeter
+      image: mx2542/anti-jmeter:1.0
+      command:
+        - "./apache-jmeter-5.4.3/bin/jmeter.sh"
+      args:
+        - "-n"
+        - "-t"
+        - "example.jmx"
+      imagePullPolicy: Always
+      volumeMounts:
+        - mountPath: /jmx
+          name: jmx
+      env:
+        - name: INFLUXDB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: middleware-influxdb
+              key: admin-user-token
+  restartPolicy: Never
+  volumes:
+    - name: jmx
+      persistentVolumeClaim:
+        claimName: jmx-nfs-pvc

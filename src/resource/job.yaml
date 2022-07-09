@@ -3,6 +3,7 @@ kind: Job
 metadata:
   name: jmx
 spec:
+  completions: 2
   template:
     spec:
       containers:
