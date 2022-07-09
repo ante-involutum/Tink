@@ -36,6 +36,7 @@ def create_job_object(job_name, file_name='/jmx/example.jmx'):
     spec = client.V1JobSpec(
         template=template,
         completions=2,
+        parallelism=2,
         backoff_limit=4)
 
     job = client.V1Job(

@@ -4,6 +4,7 @@ metadata:
   name: jmx
 spec:
   completions: 2
+  parallelism: 2
   template:
     spec:
       containers:
