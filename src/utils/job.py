@@ -18,7 +18,7 @@ def create_job_object(job_name, file_name='/jmx/example.jmx'):
         name="jmeter",
         image="mx2542/anti-jmeter:1.0",
         command=["./apache-jmeter-5.4.3/bin/jmeter.sh"],
-        args=["-n", "-t", file_name],
+        args=["-n", "-t", file_name, '-l',f'{file_name}-log.jtl'],
         image_pull_policy='IfNotPresent',
         volume_mounts=[client.V1VolumeMount(mount_path='/jmx', name='jmx')],
         env=[client.V1EnvVar(name='INFLUXDB_TOKEN', value_from=value_from)])
