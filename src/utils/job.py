@@ -4,6 +4,10 @@ Creates, updates, and deletes a job object.
 
 
 from kubernetes import client
+import os
+
+
+namespace = os.getenv('NAMESPACE')
 
 
 def create_job_object(job_name, file_name='/jmx/example.jmx'):
@@ -18,7 +22,7 @@ def create_job_object(job_name, file_name='/jmx/example.jmx'):
         name="jmeter",
         image="mx2542/anti-jmeter:1.0",
         command=["./apache-jmeter-5.4.3/bin/jmeter.sh"],
-        args=["-n", "-t", file_name, '-l',f'{file_name}-log.jtl'],
+        args=["-n", "-t", file_name],
         image_pull_policy='IfNotPresent',
         volume_mounts=[client.V1VolumeMount(mount_path='/jmx', name='jmx')],
         env=[client.V1EnvVar(name='INFLUXDB_TOKEN', value_from=value_from)])
@@ -50,14 +54,14 @@ def create_job_object(job_name, file_name='/jmx/example.jmx'):
 def create_job(api_instance, job):
     resp = api_instance.create_namespaced_job(
         body=job,
-        namespace="default")
+        namespace=namespace)
     return resp
 
 
 def get_job_status(api_instance, job_name):
     resp = api_instance.read_namespaced_job_status(
         name=job_name,
-        namespace="default")
+        namespace=namespace)
     return resp
 
 
@@ -65,7 +69,7 @@ def update_job(api_instance, job, job_name):
     job.spec.backoff_limit = 3
     resp = api_instance.patch_namespaced_job(
         name=job_name,
-        namespace="default",
+        namespace=namespace,
         body=job)
     return resp
 
@@ -73,7 +77,7 @@ def update_job(api_instance, job, job_name):
 def delete_job(api_instance, job_name):
     resp = api_instance.delete_namespaced_job(
         name=job_name,
-        namespace="default",
+        namespace=namespace,
         body=client.V1DeleteOptions(
             propagation_policy='Foreground',
             grace_period_seconds=5))

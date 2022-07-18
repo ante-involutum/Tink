@@ -50,3 +50,5 @@ spec:
           env:
             - name: KUBENETES_ENV
               value: production
+            - name: NAMESPACE
+              value: {{ .Release.Namespace | quote }}
