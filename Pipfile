@@ -11,6 +11,7 @@ autopep8 = "==1.6.0"
 uvicorn = {extras = ["standard"], version = "==0.17.6"}
 requests-toolbelt = "==0.9.1"
 pytz = "==2022.1"
+minio = "*"
 
 [dev-packages]
 
