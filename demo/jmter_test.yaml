@@ -1,0 +1,99 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config-demo
+
+data:
+  filebeat.yml: |
+    filebeat.inputs:
+    - type: log
+      paths:
+        - /cache/*.jtl
+      fields_under_root: true
+      fields: 
+        task_type: ${TASK_TYPE}
+        task_name: ${TASK_NAME}
+
+    # output.console:
+    #   pretty: true
+
+    output.kafka:
+      hosts: ["middleware-kafka.tink:9092"]
+      topic: '${TASK_TYPE}-${TASK_NAME}'
+      partition.round_robin:
+        reachable_only: false
+
+      required_acks: 1
+      compression: gzip
+      max_message_bytes: 1000000
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-demo
+spec:
+  ttlSecondsAfterFinished: 10
+  template:
+    spec:
+      containers:
+        - name: jmeter
+          image: mx2542/anti-jmeter:1.0
+          command:
+            - "bash"
+          args:
+            - "-c"
+            - "./apache-jmeter-5.4.3/bin/jmeter.sh -n -t /example.jmx > /cache/jmeter.jtl && rm /cache/jmeter.jtl"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /cache
+              name: cache-volume
+            - name: jmx-file
+              readOnly: true
+              mountPath: /example.jmx
+              subPath: example.jmx
+        - name: filebeat
+          image: docker.elastic.co/beats/filebeat:7.17.3
+          imagePullPolicy: IfNotPresent
+          args:
+            - "-e"
+            - "-E"
+            - "http.enabled=true"
+          livenessProbe:
+            exec:
+              command:
+                - cat
+                - /cache/jmeter.jtl
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: filebeat-config-demo
+              readOnly: true
+              mountPath: /usr/share/filebeat/filebeat.yml
+              subPath: filebeat.yml
+            - mountPath: /cache
+              name: cache-volume
+          env:
+            - name: TASK_TYPE
+              value: test
+            - name: TASK_NAME
+              value: '1'
+      restartPolicy: Never
+      volumes:
+        - name: filebeat-config-demo
+          configMap:
+            name: filebeat-config-demo
+            items:
+              - key: filebeat.yml
+                path: filebeat.yml
+        - name: jmx-file
+          configMap:
+            name: jmx-file
+            items:
+              - key: jmx
+                path: example.jmx
+
+        - name: cache-volume
+          emptyDir: {}
+  backoffLimit: 3
