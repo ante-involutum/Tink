@@ -10,14 +10,17 @@ data:
     - type: log
       paths:
         - /cache/*.jtl
+      fields_under_root: true
+      fields: 
+        task_type: ${TASK_TYPE}
+        task_name: ${TASK_NAME}
 
     # output.console:
     #   pretty: true
 
     output.kafka:
       hosts: ["middleware-kafka.tink:9092"]
-      topic: '${JOB_TOPIC}'
-      # topic: '%{[agent.name]}'
+      topic: '${TASK_TYPE}-${TASK_NAME}'
       partition.round_robin:
         reachable_only: false
 
@@ -29,7 +32,7 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: jmx
+  name: job-demo
 spec:
   ttlSecondsAfterFinished: 10
   template:
@@ -50,7 +53,6 @@ spec:
               readOnly: true
               mountPath: /example.jmx
               subPath: example.jmx
-
         - name: filebeat
           image: docker.elastic.co/beats/filebeat:7.17.3
           imagePullPolicy: IfNotPresent
@@ -61,8 +63,8 @@ spec:
           livenessProbe:
             exec:
               command:
-              - cat
-              - /cache/jmeter.jtl
+                - cat
+                - /cache/jmeter.jtl
             initialDelaySeconds: 5
             periodSeconds: 5
           volumeMounts:
@@ -73,9 +75,10 @@ spec:
             - mountPath: /cache
               name: cache-volume
           env:
-            - name: JOB_TOPIC
-              value: jmx
-
+            - name: TASK_TYPE
+              value: test
+            - name: TASK_NAME
+              value: '1'
       restartPolicy: Never
       volumes:
         - name: filebeat-config-demo
@@ -94,4 +97,3 @@ spec:
         - name: cache-volume
           emptyDir: {}
   backoffLimit: 3
-# kubectl create configmap jmx-file --from-file=jmx=/example.jmx -n tink

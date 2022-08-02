@@ -4,7 +4,7 @@ ENV URL=http://192.168.100.10:31447
 ENV USER=admin
 ENV PASSWORD=changeme
 ENV BUCKET_NAME=jmx
-ENV JOB_NAME=example
+ENV TASK_NAME=example
 
 
 WORKDIR /boxter

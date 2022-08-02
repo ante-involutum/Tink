@@ -1,35 +1,7 @@
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: filebeat-config-demo
-
-data:
-  filebeat.yml: |
-    filebeat.inputs:
-    - type: log
-      paths:
-        - /cache/*.jtl
-
-      # output.console:
-      #   pretty: true
-
-    output.kafka:
-      hosts: ["middleware-kafka-0.middleware-kafka-headless.tink:9092"]
-      topic: '${JOB_TOPIC}'
-      # topic: '%{[agent.name]}'
-      partition.round_robin:
-        reachable_only: false
-
-      required_acks: 1
-      compression: gzip
-      max_message_bytes: 1000000
-
----
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: atop
+  name: jmx
 spec:
   ttlSecondsAfterFinished: 10
   # activeDeadlineSeconds: 180
@@ -53,9 +25,8 @@ spec:
               value: changeme
             - name: BUCKET_NAME
               value: jmx
-            - name: JOB_NAME
+            - name: TASK_NAME
               value: example
-
       containers:
         - name: jmeter
           image: mx2542/anti-jmeter:1.0
@@ -63,7 +34,7 @@ spec:
             - "bash"
           args:
             - "-c"
-            - "./apache-jmeter-5.4.3/bin/jmeter.sh -n -t /cache-jmx/example.jmx -l /cache/jmeter.jtl && rm -f /cache/jmeter.jtl"
+            - "./apache-jmeter-5.4.3/bin/jmeter.sh -n -t /cache-jmx/example.jmx > /cache/jmeter.jtl && rm -f /cache/jmeter.jtl"
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - mountPath: /cache
@@ -93,9 +64,10 @@ spec:
             - mountPath: /cache
               name: cache-volume
           env:
-            - name: JOB_TOPIC
-              value: jmx
-
+            - name: TASK_TYPE
+              value: test
+            - name: TASK_NAME
+              value: "3"
       restartPolicy: Never
       volumes:
         - name: filebeat-config-demo
